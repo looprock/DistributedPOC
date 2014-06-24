@@ -25,8 +25,14 @@ class Worker(ConsumerMixin):
 
     def process_task(self, body, message):
         try:
-	    logger.info("%s: %s" % (datetime.datetime.today(),body))
-	    get_response_time.delay(body['url'])
+	    x = get_response_time.delay(body['url'])
+	    logger.info("%s: %s, %s" % (datetime.datetime.today(),x.id,body))
+	    #fname = "./results/%s.txt" % str(x.id)
+	    #file = open(fname, "w")
+	    #file.write(str(x.get()))
+	    #file.close()
+	    #r = json.loads(x.get())
+	    #logger.info("%s response time: %s" % (str(x.id), r['response_time']))
         except Exception as exc:
             logger.error('task raised exception: %r', exc)
         message.ack()
@@ -41,8 +47,8 @@ if __name__ == '__main__':
 
     # setup root logger
     setup_logging(loglevel='INFO', loggers=[''])
-    connection = Connection('amqp://guest:guest@localhost:5672//')
-    #with Connection('amqp://guest:guest@localhost:5672//') as conn:
+    connection = Connection('amqp://localhost:5672/pingnaut', heartbeat=5)
+    connection.heartbeat_check(rate=1)
     with connections[connection].acquire(block=True, timeout=60) as conn:
         try:
             worker = Worker(conn)
