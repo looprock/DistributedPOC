@@ -51,25 +51,6 @@ def runcom(command_line):
 app = Celery('tasks', backend='amqp', broker='amqp://guest:guest@localhost/celery-east')
 
 @app.task
-def add(x, y):
-    return x + y
-
-@app.task(ignore_result=True)
-def print_hello():
-    print 'hello there'
-
-@app.task
-def gen_prime(x):
-    multiples = []
-    results = []
-    for i in xrange(2, x+1):
-        if i not in multiples:
-            results.append(i)
-            for j in xrange(i*i, x+1, i):
-                multiples.append(j)
-    return results
-
-@app.task
 def get_response_time(url):
 	base = re.sub('[./,:]', '-', url)
 	#c = statsd.StatsClient('statsd-alpha.vast.com', 8125, prefix='pingnon')

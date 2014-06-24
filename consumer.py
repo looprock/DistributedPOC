@@ -27,12 +27,6 @@ class Worker(ConsumerMixin):
         try:
 	    x = get_response_time.delay(body['url'])
 	    logger.info("%s: %s, %s" % (datetime.datetime.today(),x.id,body))
-	    #fname = "./results/%s.txt" % str(x.id)
-	    #file = open(fname, "w")
-	    #file.write(str(x.get()))
-	    #file.close()
-	    #r = json.loads(x.get())
-	    #logger.info("%s response time: %s" % (str(x.id), r['response_time']))
         except Exception as exc:
             logger.error('task raised exception: %r', exc)
         message.ack()
