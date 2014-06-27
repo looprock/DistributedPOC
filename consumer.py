@@ -3,14 +3,51 @@ import json
 from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
 from kombu.utils import kwdict, reprcall
+from kombu import Exchange, Queue
 import datetime
-import json
+import time
 from tasks import get_response_time
+import httplib
+import socket
+import sys
+import os
 
-from queues import task_queues
+time.sleep(11)
+
+config_file = "/etc/pingnaut/config.json"
+if os.path.isfile(config_file) == True:
+    with open(config_file) as data_file:
+        config = json.load(data_file)
+else:
+    sys.exit("ERROR: no config file %s found!" % config_file)
+
+task_exchange = Exchange(config['consumer']['exchange'], type=config['consumer']['exchange_type'])
+task_queues = [Queue(config['region'])]
 
 logger = get_logger(__name__)
 
+
+class Register():
+	def __init__(self):
+		self.service = "pingnaut-consumer-%s" % config['region']
+		self.status_url = "http://%s:18002/status" % (socket.getfqdn())
+		self.blob = blob = {"id": self.service, "url": self.status_url}
+		self.data = json.dumps(self.blob)
+		self.connection =  httplib.HTTPConnection('localhost:18001')
+        	self.path = "/checks/%s" % (self.service)
+	def add(self):
+		if config['use_megaphone'] == "true":
+			logger.info("Registering with megaphone")
+			self.body_content = ''
+        		self.connection.request('POST', '/checks', self.data)
+        		result = self.connection.getresponse()
+        		logger.info("megaphone add result: %s - %s" % (result.status, result.reason))
+	def remove(self):
+		if config['use_megaphone'] == "true":
+			logger.info("un-registering with megaphone")
+        		self.connection.request('DELETE', self.path)
+        		result = self.connection.getresponse()
+        		logger.info("megaphone remove result: %s - %s" % (result.status, result.reason))
 
 class Worker(ConsumerMixin):
 
@@ -19,7 +56,6 @@ class Worker(ConsumerMixin):
 
     def get_consumers(self, Consumer, channel):
         return [Consumer(queues=task_queues,
-                         #accept=['pickle', 'json'],
                          accept=['json'],
                          callbacks=[self.process_task])]
 
@@ -41,12 +77,16 @@ if __name__ == '__main__':
 
     # setup root logger
     setup_logging(loglevel='INFO', loggers=[''])
-    connection = Connection('amqp://localhost:5672/pingnaut', heartbeat=5)
+    megaphone = Register()
+    connection = Connection(config['consumer']['connection'], heartbeat=int(config['consumer']['heartbeat']))
     connection.heartbeat_check(rate=1)
+    #with Connection('amqp://guest:guest@localhost:5672//') as conn:
     with connections[connection].acquire(block=True, timeout=60) as conn:
         try:
+	    megaphone.add()
             worker = Worker(conn)
             worker.run()
         except KeyboardInterrupt:
 	    conn.release()
+	    megaphone.remove()
             print('bye bye')

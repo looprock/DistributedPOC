@@ -1,0 +1,24 @@
+{
+  "region": "east",
+  "use_megaphone": "false",
+  "celery": {
+        "backend": "amqp",
+        "broker": "amqp://celery:supersecret@celery-east.example.com/celery-east",
+        "task_data": {
+                "db_host": "pingnaut-db.example.com",
+                "db_username": "pingnaut",
+                "db_password": "supersecret",
+                "db_name": "pingnaut",
+                "statsd_host": "statsd.example.com",
+                "statsd_port": 8125, 
+                "statsd_prefix": "pingnaut",
+        }
+
+  },
+  "consumer": {
+        "connection": "amqp://pingnaut:supersecret@rabbit-mq.example.com:5672/pingnaut",
+        "heartbeat": 5,
+        "exchange": "checks",
+        "exchange_type": "fanout"
+  }
+}
