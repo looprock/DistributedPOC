@@ -85,6 +85,6 @@ def get_response_time(url):
         #file.write("%s\n" % str(data))
         #file.close()
 	db = dbc()
-	sql = "insert into results (response_time,source,traceroute,url,timestamp,response_code) values ('%s','%s','%s','%s','%s','%s')" % (data['response_time'],data['source'],data['traceroute'],data['url'],data['timestamp'],data['response_code'])
+	sql = "insert into results (response_time,source,traceroute,url,timestamp,response_code,region) values ('%s','%s','%s','%s','%s','%s','%s')" % (data['response_time'],data['source'],data['traceroute'],data['url'],data['timestamp'],data['response_code'],config['region'])
 	db.insert(sql)
 	return json.dumps(data)

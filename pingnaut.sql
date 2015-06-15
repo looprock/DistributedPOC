@@ -4,6 +4,7 @@ response_time float(9) NOT NULL,
 source varchar(512) NOT NULL,
 traceroute text,
 url varchar(1024),
+region varchar(64),
 response_code int(4),
 timestamp TIMESTAMP,
 PRIMARY KEY (id)
