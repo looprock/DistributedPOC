@@ -1,0 +1,2 @@
+#!/bin/sh
+mysql pingnaut -e "insert into sites (name,url) value ('$1', '$2')"
