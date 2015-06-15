@@ -60,7 +60,7 @@ app = Celery('tasks', backend=config['celery']['backend'], broker=config['celery
 @app.task
 def get_response_time(url):
 	base = re.sub('[./,:]', '-', url)
-	c = statsd.StatsClient(config['celery']['task_data']['statsd_host'], config['celery']['task_data']['statsd_port'], prefix=config['celery']['task_data']['statsd_prefix'])
+	#c = statsd.StatsClient(config['celery']['task_data']['statsd_host'], config['celery']['task_data']['statsd_port'], prefix=config['celery']['task_data']['statsd_prefix'])
 	d = str(datetime.datetime.utcnow())
 	nf = urllib.urlopen(url)
 	rc = nf.getcode()
@@ -69,7 +69,7 @@ def get_response_time(url):
 	end = time.time()
 	nf.close()	
 	r = end - start
-	c.timing('base.response_time', round(r, 4))
+	#c.timing('base.response_time', round(r, 4))
 	u = url.split("/")[2]
 	tracert = runcom("/usr/bin/mtr -r %s" % u)
 	data = AutoVivification()

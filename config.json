@@ -11,7 +11,7 @@
                 "db_name": "pingnaut",
                 "statsd_host": "statsd.example.com",
                 "statsd_port": 8125, 
-                "statsd_prefix": "pingnaut",
+                "statsd_prefix": "pingnaut"
         }
 
   },
